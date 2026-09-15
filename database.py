@@ -1,163 +1,141 @@
-#database logic is file mein hai.
+"""
+database.py
 
-import sqlite3
+"""
+
+import os
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
+db = SQLAlchemy()
 
-# Database Connection
-def get_db():
-    """
-    Database connection kholta hai.
-    row_factory = sqlite3.Row — isse hum row['column_name'] likh sakte hain
-    """
-    conn = sqlite3.connect('app.db')
-    conn.row_factory = sqlite3.Row
-    return conn
+# MODELS/Tables
+class User(db.Model):
+    __tablename__ = 'users'
 
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    expenses = db.relationship('Expense', backref='user', lazy=True)
+
+
+class Expense(db.Model):
+    __tablename__ = 'expenses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    note = db.Column(db.String(200))
+    date = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+
+# SETUP
+def init_db(app):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app)
 
 
 # USER FUNCTIONS
 def create_user(username, password):
-    """
-    Naya user banata hai. Password ko hash kar ke store karta hai.
-    Returns: True agar user bana, False agar username pehle se hai
-    """
-    conn = get_db()
-    cur = conn.cursor()
-    password_hash = generate_password_hash(password)
+    existing = User.query.filter_by(username=username).first()
+    if existing:
+        return False
 
-    try:
-        cur.execute(
-            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            (username, password_hash)
-        )
-        conn.commit()
-        return True
-    except sqlite3.IntegrityError: #unique username check krn k liye
-        
-        return False #username already exists
-    finally:
-        conn.close()
+    user = User(
+        username=username,
+        password_hash=generate_password_hash(password)
+    )
+    db.session.add(user)
+    db.session.commit()
+    return True
 
 
 def get_user(username):
-    """
-    Username se user dhoondta hai (login ke liye).
-    Returns: row object ya None
-    """
-    conn = get_db()
-    user = conn.execute(
-        "SELECT * FROM users WHERE username = ?",
-        (username,)
-    ).fetchone()
-    conn.close()
-    return user
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return {
+            'id': user.id,
+            'username': user.username,
+            'password_hash': user.password_hash
+        }
+    return None
 
 
 def verify_password(user, password):
-    """
-    Check karta hai ke password sahi hai ya nahi.
-    Returns: True / False
-    """
     return check_password_hash(user['password_hash'], password)
-
 
 
 # EXPENSE FUNCTIONS
 def add_expense(user_id, amount, category, note, date):
-    """
-    Naya expense add karta hai.
-    Returns: naye expense ka ID
-    """
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute(
-        """INSERT INTO expenses (user_id, amount, category, note, date) 
-        VALUES (?, ?, ?, ?, ?)""",
-
-        (user_id, amount, category, note, date)
+    expense = Expense(
+        user_id=user_id,
+        amount=amount,
+        category=category,
+        note=note,
+        date=date
     )
-    conn.commit()
-    expense_id = cur.lastrowid #Jonsi expense ka ID hai, wo return krta hai
-    conn.close()
-    return expense_id
+    db.session.add(expense)
+    db.session.commit()
+    return expense.id
 
 
 def get_expenses(user_id):
-    """
-    User ke saare expenses return karta hai — naye pehle.
-    """
-    conn = get_db()
-    expenses = conn.execute(
-        """SELECT * FROM expenses
-           WHERE user_id = ?
-           ORDER BY date DESC, id DESC""",
-        (user_id,) #Is user id k liye saare expenses dhoondta hai.
-    ).fetchall()
-    conn.close()
-    return expenses
+    expenses = Expense.query.filter_by(user_id=user_id) \
+        .order_by(Expense.date.desc(), Expense.id.desc()).all()
+
+    return [{
+        'id': e.id,
+        'user_id': e.user_id,
+        'amount': e.amount,
+        'category': e.category,
+        'note': e.note,
+        'date': e.date
+    } for e in expenses]
 
 
 def get_expense(expense_id, user_id):
-    """
-    Ek single expense dhoondta hai (edit page ke liye).
-    user_id bhi check — security ke liye.
-    """
-    conn = get_db()
-    expense = conn.execute(
-        "SELECT * FROM expenses WHERE id = ? AND user_id = ?",
-        (expense_id, user_id)
-    ).fetchone()
-    conn.close()
-    return expense
+    e = Expense.query.filter_by(id=expense_id, user_id=user_id).first()
+    if e:
+        return {
+            'id': e.id,
+            'user_id': e.user_id,
+            'amount': e.amount,
+            'category': e.category,
+            'note': e.note,
+            'date': e.date
+        }
+    return None
 
 
 def update_expense(expense_id, user_id, amount, category, note, date):
-    """
-    Expense edit karta hai.
-    Returns: True agar update hua, False agar expense mila hi nahi
-    """
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute(
-        """UPDATE expenses
-           SET amount = ?, category = ?, note = ?, date = ?
-           WHERE id = ? AND user_id = ?""",
-        (amount, category, note, date, expense_id, user_id)
-    )
-    conn.commit()
-    updated = cur.rowcount > 0
-    conn.close()
-    return updated
+    e = Expense.query.filter_by(id=expense_id, user_id=user_id).first()
+    if not e:
+        return False
+
+    e.amount = amount
+    e.category = category
+    e.note = note
+    e.date = date
+    db.session.commit()
+    return True
 
 
 def delete_expense(expense_id, user_id):
-    """
-    Expense delete karta hai.
-    user_id check.
-    Returns: True agar delete hua, False agar nahi mila
-    """
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute(
-        "DELETE FROM expenses WHERE id = ? AND user_id = ?",
-        (expense_id, user_id)
-    )
-    conn.commit()
-    deleted = cur.rowcount > 0 #update ya delete hone k baad rowcount check krta hai true ya fasle dene k liye.
-    conn.close()
-    return deleted
+    e = Expense.query.filter_by(id=expense_id, user_id=user_id).first()
+    if not e:
+        return False
+
+    db.session.delete(e)
+    db.session.commit()
+    return True
 
 
 def get_total(user_id):
-    """
-    User ke saare expenses ka total nikaalta hai.
-    Returns: total amount.
-    """
-    conn = get_db()
-    row = conn.execute(
-        "SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ?",
-        (user_id,)
-    ).fetchone()
-    conn.close()
-    return row['total']
+    result = db.session.query(db.func.sum(Expense.amount)) \
+        .filter_by(user_id=user_id).scalar()
+    return result or 0

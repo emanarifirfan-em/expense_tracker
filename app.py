@@ -3,16 +3,26 @@ app.py — Flask application main file.
 
 """
 
+import os
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from database import *
 from functools import wraps
 
+load_dotenv()
+
+from database import *
 
 
 # APP SETUP
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback-dev-key')
 
-app.secret_key = '6dc44748992b7af35c9632595fd3d53cd35185fa6d2e667cc00a1e520a0b92ce'  #key to ensure secure login state
+#Database initialize
+init_db(app)
+
+with app.app_context():
+    db.create_all()
+
 
 # HELPER — Login Required Decorator
 def login_required(f):

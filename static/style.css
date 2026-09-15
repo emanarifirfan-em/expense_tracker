@@ -371,11 +371,12 @@ a:hover {
 .field select,
 .field textarea {
     width: 100%;
-    padding: 10px 14px;
+    padding: 12px 16px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 1.5;  
     color: var(--text);
     background: var(--surface);
     transition: all var(--t);
@@ -560,7 +561,6 @@ a:hover {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    overflow: hidden;
     box-shadow: var(--shadow-sm);
 }
 
@@ -766,7 +766,7 @@ a:hover {
         flex-direction: column;
         gap: 6px;
     }
-
+}
 
     /* 
    DASHBOARD EXTRAS
@@ -794,8 +794,8 @@ a:hover {
  */
 
 .form-section {
-    padding: 32px;
-    max-width: 720px;
+    padding: 40px 48px;
+    max-width: 100%;
 }
 
 .expense-form {
@@ -812,8 +812,10 @@ a:hover {
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 14px center;
-    padding-right: 40px;
+    padding-right: 44px;
+    padding-left: 16px;   
     cursor: pointer;
+    height: auto;
 }
 
 .expense-form .form-hint {
@@ -823,6 +825,9 @@ a:hover {
 
 .expense-form input[type="date"] {
     font-family: inherit;
+    font-size: 15px;
+    padding: 12px 16px;
+
 }
 
 .expense-form input[type="date"]::-webkit-calendar-picker-indicator {
@@ -834,4 +839,5 @@ a:hover {
 .expense-form input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 1;
 }
-}
+
+
