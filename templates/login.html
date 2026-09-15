@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In · Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+    <div class="auth-card">
+
+        <div class="auth-head">
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">Sign in to continue to your dashboard.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+
+            <div class="field">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    required
+                    autofocus
+                    autocomplete="username"
+                    placeholder="Your username">
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Your password">
+            </div>
+
+            <button type="Submit" class="btn btn-primary btn-block">
+                Sign In
+            </button>
+        </form>
+
+        <p class="auth-foot">
+            Don't have an account?
+            <a href="{{ url_for('signup') }}">Create one</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
