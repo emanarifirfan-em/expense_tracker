@@ -1,11 +1,6 @@
 """
-app.py — Flask application ka main file hai.
-saare routes yahan hain.
-Yeh file:
-1. Browser se requests leti hai
-2. database.py ke functions call karti hai
-3. HTML templates render karti hai
-4. Sessions handle karti hai (login state)
+app.py — Flask application main file.
+
 """
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
