@@ -207,7 +207,7 @@ def edit(expense_id):
             return render_template('edit_expense.html', expense=expense)
 
         update_expense(expense_id, user_id, amount, category, note, date)
-        flash('Expense update ho gaya', 'success')
+        flash('Expense updated successfully', 'success')
         return redirect(url_for('dashboard'))
 
     return render_template('edit_expense.html', expense=expense)
