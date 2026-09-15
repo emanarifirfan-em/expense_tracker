@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · Expense Tracker{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEAD -->
+<div class="page-head">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">
+            Welcome back, {{ username }}. Here's your spending overview.
+        </p>
+    </div>
+
+    <a href="{{ url_for('add') }}" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add Expense
+    </a>
+</div>
+
+
+<!-- STATS -->
+<div class="stat-grid">
+
+    <div class="stat-card">
+        <div class="stat-label">Total Spending</div>
+        <div class="stat-value primary">Rs. {{ "%.2f"|format(total) }}</div>
+        <div class="stat-foot">All time</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value">{{ expenses|length }}</div>
+        <div class="stat-foot">Transactions</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Average</div>
+        <div class="stat-value success">
+            {% if expenses %}
+                Rs. {{ "%.2f"|format(total / (expenses|length)) }}
+            {% else %}
+                Rs. 0.00
+            {% endif %}
+        </div>
+        <div class="stat-foot">Per expense</div>
+    </div>
+
+</div>
+
+
+<!-- EXPENSE LIST -->
+<div class="section">
+
+    <div class="section-head">
+        <h2 class="section-title">Recent Expenses</h2>
+        <span class="section-count">
+            {{ expenses|length }} item{% if expenses|length != 1 %}s{% endif %}
+        </span>
+    </div>
+
+    {% if expenses %}
+
+    <ul class="expense-list">
+        {% for e in expenses %}
+        <li class="expense-item">
+
+            <div class="expense-badge">
+                {{ e['category'][0]|upper }}
+            </div>
+
+            <div class="expense-info">
+                <div class="expense-category">{{ e['category'] }}</div>
+                {% if e['note'] %}
+                    <div class="expense-note">{{ e['note'] }}</div>
+                {% endif %}
+                <div class="expense-date">{{ e['date'] }}</div>
+            </div>
+
+            <div class="expense-amount">
+                Rs. {{ "%.2f"|format(e['amount']) }}
+            </div>
+
+            <div class="expense-actions">
+                <a href="{{ url_for('edit', expense_id=e['id']) }}" class="btn-ghost">
+                    Edit
+                </a>
+                <form method="POST"
+                      action="{{ url_for('delete', expense_id=e['id']) }}"
+                      data-confirm="Delete this expense? This cannot be undone.">
+                    <button type="submit" class="btn-ghost danger">
+                        Delete
+                    </button>
+                </form>
+            </div>
+
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% else %}
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+        <div class="empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+        </div>
+        <div class="empty-title">No expenses yet</div>
+        <div class="empty-text">
+            Start tracking your spending by adding your first expense.
+        </div>
+        <a href="{{ url_for('add') }}" class="btn btn-primary">
+            Add Your First Expense
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

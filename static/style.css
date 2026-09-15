@@ -766,4 +766,25 @@ a:hover {
         flex-direction: column;
         gap: 6px;
     }
+
+
+    /* 
+   DASHBOARD EXTRAS
+   */
+
+.btn svg {
+    flex-shrink: 0;
+}
+
+.section-count {
+    padding: 4px 10px;
+    background: var(--surface-2);
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.expense-badge {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+}
 }
