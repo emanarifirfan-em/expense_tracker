@@ -8,8 +8,17 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+
     
-    // 1. FLASH MESSAGES
+    //AUTO-FILL DATE
+    const dateInput = document.querySelector('input[type="date"]');
+    if (dateInput && !dateInput.value) {
+        //YYYY-MM-DD
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+
+    
+    //FLASH MESSAGES
     document.querySelectorAll('.flash').forEach((el, i) => {
         setTimeout(() => {
             el.style.transition = 'opacity 0.4s, transform 0.4s';
@@ -21,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     
-    // 2. DELETE CONFIRMATION
+    //DELETE CONFIRMATION
     document.querySelectorAll('form[data-confirm]').forEach(form => {
         form.addEventListener('submit', (e) => {
             const msg = form.dataset.confirm || 'Are you sure?';
@@ -33,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     
-    // 3. AUTO-DETECT CATEGORY COLOR
+    //AUTO-DETECT CATEGORY COLOR
     const categoryColors = {
         'food': 'cat-food',
         'bills': 'cat-bills',
@@ -55,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     
-    // 4. FORM VALIDATION — Password confirm
+    //FORM VALIDATION — Password confirm
     const signupForm = document.querySelector('form[action*="signup"]');
     if (signupForm) {
         const pass = signupForm.querySelector('#password');
@@ -72,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     
-    // 5. SUBTLE PARALLAX
+    //SUBTLE PARALLAX
     document.querySelectorAll('.stat-card').forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
